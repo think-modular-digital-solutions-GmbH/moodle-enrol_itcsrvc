@@ -25,12 +25,115 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+use enrol_itcsrvc\locallib;
+
 if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_heading('enrol_itcsrvc_settings', '', get_string('pluginname_desc', 'enrol_itcsrvc')));
 
-    $settings->add(new admin_setting_configcheckbox('enrol_itcsrvc/requirepassword',
-        get_string('requirepassword', 'enrol_itcsrvc'), get_string('requirepassword_desc', 'enrol_itcsrvc'), 0));
+    // Connection settings.
+    $url = new moodle_url('/enrol/campusonline/test.php', ['function' => 'testconnection']);
+    $button = html_writer::link(
+        $url,
+        get_string('testconnection', 'enrol_itcsrvc'),
+        ['class' => 'btn btn-secondary m-1']
+    );
+    $settings->add(new admin_setting_heading(
+        'enrol_itcsrvc/connectionsettings',
+        get_string('connectionsettings', 'enrol_itcsrvc'),
+        $button,
+    ));
 
-    $settings->add(new admin_setting_configcheckbox('enrol_itcsrvc/usepasswordpolicy',
-        get_string('usepasswordpolicy', 'enrol_itcsrvc'), get_string('usepasswordpolicy_desc', 'enrol_itcsrvc'), 0));
+    // Base URL.
+    $settings->add(new admin_setting_configtext(
+        'enrol_itcsrvc/baseurl',
+        get_string('baseurl', 'enrol_itcsrvc'),
+        '',
+        '',
+        PARAM_URL,
+        50
+    ));
+
+    // Merchant product ID.
+    $settings->add(new admin_setting_configtext(
+        'enrol_itcsrvc/productid',
+        get_string('productid', 'enrol_itcsrvc'),
+        '',
+        '',
+        PARAM_TEXT,
+        50
+    ));
+
+    // Transflow ID.
+    $settings->add(new admin_setting_configtext(
+        'enrol_itcsrvc/transflowid',
+        get_string('transflowid', 'enrol_itcsrvc'),
+        '',
+        '',
+        PARAM_TEXT,
+        50
+    ));
+
+    // API key.
+    $settings->add(new admin_setting_configpasswordunmask(
+        'enrol_itcsrvc/apikey',
+        get_string('apikey', 'enrol_itcsrvc'),
+        '',
+        '',
+    ));
+
+    // Payment settings.
+    $settings->add(new admin_setting_heading(
+        'enrol_itcsrvc/paymentsettings',
+        get_string('paymentsettings', 'enrol_itcsrvc'),
+        '',
+    ));
+
+    // Default cost.
+    $settings->add(new admin_setting_configtext(
+        'enrol_itcsrvc/defaultcost',
+        get_string('defaultcost', 'enrol_itcsrvc'),
+        '',
+        '0.00',
+        PARAM_FLOAT,
+        10,
+    ));
+
+    // Default currency.
+    $options = locallib::get_currency_codes();
+    $settings->add(new admin_setting_configselect(
+        'enrol_itcsrvc/defaultcurrency',
+        get_string('defaultcurrency', 'enrol_itcsrvc'),
+        '',
+        'USD',
+        $options,
+    ));
+
+    // Default payment method.
+    $options = ['card'];
+    $settings->add(new admin_setting_configselect(
+        'enrol_itcsrvc/defaultpaymentmethod',
+        get_string('defaultpaymentmethod', 'enrol_itcsrvc'),
+        '',
+        'card',
+        $options,
+    ));
+
+    // Default network.
+    $settings->add(new admin_setting_configtext(
+        'enrol_itcsrvc/defaultnetwork',
+        get_string('defaultnetwork', 'enrol_itcsrvc'),
+        '',
+        'VODAFONE',
+        PARAM_TEXT,
+    ));
+
+    // Default MSISDN.
+    $settings->add(new admin_setting_configtext(
+        'enrol_itcsrvc/defaultmsisdn',
+        get_string('defaultmsisdn', 'enrol_itcsrvc'),
+        '',
+        '',
+        PARAM_TEXT,
+    ));
+
 }

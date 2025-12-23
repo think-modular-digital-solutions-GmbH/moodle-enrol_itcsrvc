@@ -23,5 +23,24 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['apikey'] = 'API key';
+$string['baseurl'] = 'Base URL';
+$string['connectionsettings'] = 'Connection settings';
+$string['cost'] = 'Course enrolment cost';
+$string['currency'] = 'Currency';
+$string['defaultcost'] = 'Default course enrolment cost';
+$string['defaultcurrency'] = 'Default currency';
+$string['defaultmsisdn'] = 'Default MSISDN';
+$string['defaultnetwork'] = 'Default network';
+$string['defaultpaymentmethod'] = 'Default payment method';
+$string['msisdn'] = 'MSISDN';
+$string['network'] = 'Network';
+$string['paymentmethod'] = 'Payment method';
+$string['paymentsettings'] = 'Payment settings';
+$string['paymenttext'] = 'Enrolment fee for Moodle course {$a->course} at {$a->site}';
 $string['pluginname'] = 'ITC payment gateway enrolment';
+$string['pluginname_desc'] = 'Users can pay to access courses via the ITC payment gateway.';
 $string['privacy:metadata'] = 'The ITC payment gateway enrolment plugin does not store any personal data.';
+$string['productid'] = 'Merchant product ID';
+$string['testconnection'] = 'Test connection';
+$string['transflowid'] = 'Transflow ID';
