@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * ITC payment gateway enrolment plugin version specification.
+ * Callback endpoint for ITC payment gateway enrolment plugin.
  *
  * @package    enrol_itcsrvc
  * @copyright  2025 think modular
@@ -23,16 +23,22 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+require_once('../../config.php');
+
 defined('MOODLE_INTERNAL') || die();
 
-// Basics.
-$plugin->component = 'enrol_itcsrvc';
-$plugin->requires  = 2024100100;
-$plugin->maturity = MATURITY_STABLE;
-$plugin->dependencies = [];
-$plugin->supported = [405, 502];
+echo "failure";
+die();
 
-// Version.
-$plugin->version   = 2025122302;
-$plugin->release = '1.0.0';
+global $DB;
+
+$record = new stdClass();
+$record->timestamp = time();
+$record->type = 1; // Replace with global later.
+$record->enrolid = 1;
+$record->courseid = 1;
+$record->userid = 1;
+$record->httpstatus = 200;
+$record->payload = 'FAILURE';
+$DB->insert_record('enrol_itcsrvc_logs', $record);
 

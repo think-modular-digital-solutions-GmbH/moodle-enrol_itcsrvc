@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * ITC payment gateway enrolment plugin version specification.
+ * Empty enrol_self form copied from enrol/self plugin to keep UI consistent with core.
  *
  * @package    enrol_itcsrvc
  * @copyright  2025 think modular
@@ -23,16 +23,22 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+namespace enrol_itcsrvc\form;
 
-// Basics.
-$plugin->component = 'enrol_itcsrvc';
-$plugin->requires  = 2024100100;
-$plugin->maturity = MATURITY_STABLE;
-$plugin->dependencies = [];
-$plugin->supported = [405, 502];
+/**
+ * Empty enrol_self form.
+ * Useful to mimic valid enrol instances UI when the enrolment instance is not available.
+ *
+ * @package enrol_self
+ */
+class empty_form extends moodleform {
 
-// Version.
-$plugin->version   = 2025122302;
-$plugin->release = '1.0.0';
-
+    /**
+     * Form definition.
+     * @return void
+     */
+    public function definition() {
+        $this->_form->addElement('header', 'selfheader', $this->_customdata->header);
+        $this->_form->addElement('static', 'info', '', $this->_customdata->info);
+    }
+}

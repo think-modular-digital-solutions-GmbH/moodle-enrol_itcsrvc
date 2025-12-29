@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Class containing helper functions for the ITC payment gateway enrolment plugin.
+ * Contains class for helper functions for the ITC payment gateway enrolment plugin.
  *
  * @package    enrol_itcsrvc
  * @copyright  2025 think modular
@@ -23,3 +23,150 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+/**
+ * Helper functions for ITC payment gateway enrolment plugin.
+ *
+ * @package    enrol_itcsrvc
+ * @copyright  2025 think modular
+ * @author     Stefan Weber <stefan.weber@think-modular.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+namespace enrol_itcsrvc;
+
+use Exception;
+use stdClass;
+use moodle_url;
+
+class itcsrvc {
+    /* constants for status */
+    const STATUS_PENDING = 0;
+    const STATUS_COMPLETED = 1;
+    const STATUS_FAILED = 2;
+
+    /**
+     * Process a payment for the given enrolment instance.
+     * @param object $instance
+     */
+    public static function pay($instance) {
+
+        global $DB, $USER;
+
+        // URLs.
+        $courseurl = new \moodle_url('/course/view.php', ['id' => $instance->courseid]);
+        $courseurl = $courseurl->out(false);
+        $successurl = new \moodle_url('/enrol/itcsrvc/success.php', ['instanceid' => $instance->id]);
+        $successurl = $successurl->out(false);
+        $failureurl = new \moodle_url('/enrol/itcsrvc/failure.php', ['instanceid' => $instance->id]);
+        $failureurl = $failureurl->out(false);
+        $callbackurl = new \moodle_url('/enrol/itcsrvc/callback.php', ['instanceid' => $instance->id]);
+        $callbackurl = $callbackurl->out(false);
+
+        // Prepare request.
+        $endpoint = '/request-payments';
+        $data = [
+            'fullName' => fullname($USER),
+            'email' => $USER->email,
+            "narration" => get_string(
+                'narration',
+                'enrol_itcsrvc',
+                $courseurl
+            ),
+            "msisdn" => '',
+            "amount" => $instance->cost,
+            "currency" => $instance->currency,
+            "successRedirectUrl" => $successurl,
+            "failureRedirectUrl" => $failureurl,
+            "callbackUrl" => $callbackurl,
+            "pageDescription" => "Checkout Page",
+            "pageTitle" => "Checkout Page",
+        ];
+
+        // Send request.
+        $response = self::request($endpoint, $data);
+        $responsedata = $response['data'];
+
+        // Get checkout URL.
+        if ($responsedata === null) {
+            throw new Exception('Invalid response: ' . json_encode($response));
+        }
+        if (!isset($responsedata['data']['checkoutUrl'])) {
+            throw new Exception('Invalid response: ' . json_encode($response));
+        }
+        $checkouturl = $responsedata['data']['checkoutUrl'];
+
+        // Log response.
+        $record = new stdClass();
+        $record->enrolid = $instance->id;
+        $record->courseid = $instance->courseid;
+        $record->userid = $USER->id;
+        $record->productid = get_config('enrol_itcsrvc', 'productid');
+        $record->transflowid = get_config('enrol_itcsrvc', 'transflowid');
+        $record->transaction_reference = $responsedata['data']['transactionReference'];
+        $record->payment_start = time();
+        $record->status = STATUS_PENDING;
+        $DB->insert_record('enrol_itcsrvc_logs', $record);
+
+        // Open checkout URL in browser.
+        redirect(new moodle_url($checkouturl));
+    }
+
+    /**
+     * Send a request to the ITC service.
+     * @param string $endpoint
+     * @param array $data
+     * @return array
+     */
+    public static function request($endpoint, $data) {
+        $baseurl = get_config('enrol_itcsrvc', 'baseurl');
+        $data['apiKey'] = get_config('enrol_itcsrvc', 'apikey');
+        $data['merchantProductId'] = get_config('enrol_itcsrvc', 'productid');
+        $data['transflowId'] = get_config('enrol_itcsrvc', 'transflowid');
+
+        // Send cURL request.
+        $ch = curl_init();
+        $url = rtrim($baseurl, '/') . '/' . ltrim($endpoint, '/');
+        curl_setopt_array($ch, [
+            CURLOPT_URL            => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST  => 'POST',
+            CURLOPT_HTTPHEADER     => [
+                'Content-Type: application/json',
+            ],
+            CURLOPT_POSTFIELDS     => json_encode($data),
+            CURLOPT_TIMEOUT => 10,
+        ]);
+        $response = curl_exec($ch);
+        if ($response === false) {
+            throw new Exception('cURL error: ' . curl_error($ch));
+        }
+
+        // Get HTTP status code.
+        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        $responsedata = json_decode($response, true);
+        return [
+            'data' => $responsedata,
+            'httpcode' => $httpcode,
+        ];
+    }
+
+    /**
+     * Get all official ISO 4217 currency codes
+     * @return array
+     */
+    public static function get_currency_codes() {
+        $currencies = \ResourceBundle::getLocales('');
+        $currencyCodes = \ResourceBundle::create('en', 'ICUDATA-curr')->get('Currencies');
+
+        $codes = [];
+        foreach ($currencyCodes as $code => $data) {
+            if (strlen($code) === 3) {
+                $codes[$code] = $code;
+            }
+        }
+
+        return $codes;
+    }
+}

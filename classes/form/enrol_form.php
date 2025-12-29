@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Privacy class for the ITC payment gateway enrolment plugin.
+ * Contains class for the ITC payment gateway enrolment form.
  *
  * @package    enrol_itcsrvc
  * @copyright  2025 think modular
@@ -23,24 +23,42 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace enrol_itcsrvc\privacy;
+namespace enrol_itcsrvc\form;
+
+use enrol_itcsrvc\itcsrvc;
+
+require_once($CFG->libdir.'/formslib.php');
 
 /**
- * Privacy class for requesting user data.
+ * Enrolment form.
  *
- * @package    enrol_itcsrvc
- * @copyright  2025 think modular
- * @author     Stefan Weber <stefan.weber@think-modular.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package enrol_itcsrvc
  */
-class provider implements \core_privacy\local\metadata\null_provider {
+class enrol_form extends \moodleform {
+
     /**
-     * Get the language string identifier with the component's language
-     * file to explain why this plugin stores no data.
-     *
-     * @return  string
+     * Form definition.
+     * @return void
      */
-    public static function get_reason(): string {
-        return 'privacy:metadata';
+    public function definition() {
+
+        // Payment text.
+        $currencies = itcsrvc::get_currency_codes();
+        $fee = $this->_customdata->cost . ' ' . $this->_customdata->currency;
+        $text = str_replace('[fee]', $fee, $this->_customdata->customtext1);
+        $this->_form->addElement(
+            'html',
+            $text,
+        );
+
+        // Spacer.
+        $this->_form->addElement('static', 'spacer', '', '<br>');
+
+        // Submit button.
+        $this->_form->addElement(
+            'submit',
+            'submitbutton',
+            get_string('paynow', 'enrol_itcsrvc'),
+        );
     }
 }

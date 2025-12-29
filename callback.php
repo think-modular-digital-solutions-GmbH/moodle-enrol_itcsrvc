@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Contains class for helper functions for the ITC payment gateway enrolment plugin.
+ * Callback endpoint for ITC payment gateway enrolment plugin.
  *
  * @package    enrol_itcsrvc
  * @copyright  2025 think modular
@@ -23,33 +23,26 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-/**
- * Helper functions for ITC payment gateway enrolment plugin.
- *
- * @package    enrol_itcsrvc
- * @copyright  2025 think modular
- * @author     Stefan Weber <stefan.weber@think-modular.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+require_once('../../config.php');
+require_once('lib.php');
 
-namespace enrol_itcsrvc;
+defined('MOODLE_INTERNAL') || die();
 
-class locallib {
-    /**
-     * Get all official ISO 4217 currency codes
-     */
-    public static function get_currency_codes() {
-        $currencies = \ResourceBundle::getLocales('');
-        $currencyCodes = \ResourceBundle::create('en', 'ICUDATA-curr')->get('Currencies');
+global $DB;
 
-        $codes = [];
-        foreach ($currencyCodes as $code => $data) {
-            if (strlen($code) === 3) {
-                $codes[] = $code;
-            }
-        }
+// Read contents.
+$raw = file_get_contents('php://input');
+$data = json_decode($raw, true);
 
-        sort($codes);
-        return $codes;
-    }
-}
+// Log data.
+$record = new stdClass();
+$record->timestamp = time();
+$record->type = enrol_itcsrvc_plugin::TYPE_INCOMING; // Replace with global later.
+$record->enrolid = 1;
+$record->courseid = 1;
+$record->userid = 1;
+$record->httpstatus = 200;
+$record->payload = json_encode($data);
+$DB->insert_record('enrol_itcsrvc_logs', $record);
+
+echo "OK";

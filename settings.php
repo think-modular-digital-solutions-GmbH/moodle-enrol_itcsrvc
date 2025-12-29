@@ -25,13 +25,13 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-use enrol_itcsrvc\locallib;
+use enrol_itcsrvc\itcsrvc;
 
 if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_heading('enrol_itcsrvc_settings', '', get_string('pluginname_desc', 'enrol_itcsrvc')));
 
     // Connection settings.
-    $url = new moodle_url('/enrol/campusonline/test.php', ['function' => 'testconnection']);
+    $url = new moodle_url('/enrol/itcsrvc/testconnection.php');
     $button = html_writer::link(
         $url,
         get_string('testconnection', 'enrol_itcsrvc'),
@@ -88,18 +88,29 @@ if ($ADMIN->fulltree) {
         '',
     ));
 
+    // Default text.
+    $settings->add(new admin_setting_configtextarea(
+        'enrol_itcsrvc/defaulttext',
+        get_string('defaulttext', 'enrol_itcsrvc'),
+        get_string('text_help', 'enrol_itcsrvc'),
+        get_string('defaulttextdefault', 'enrol_itcsrvc'),
+        PARAM_RAW,
+        50,
+        5,
+    ));
+
     // Default cost.
     $settings->add(new admin_setting_configtext(
         'enrol_itcsrvc/defaultcost',
         get_string('defaultcost', 'enrol_itcsrvc'),
         '',
-        '0.00',
+        '0',
         PARAM_FLOAT,
         10,
     ));
 
     // Default currency.
-    $options = locallib::get_currency_codes();
+    $options = itcsrvc::get_currency_codes();
     $settings->add(new admin_setting_configselect(
         'enrol_itcsrvc/defaultcurrency',
         get_string('defaultcurrency', 'enrol_itcsrvc'),

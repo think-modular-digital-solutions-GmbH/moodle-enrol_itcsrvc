@@ -23,8 +23,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['alreadyenrolled'] = 'You are already enrolled in this course.';
 $string['apikey'] = 'API key';
 $string['baseurl'] = 'Base URL';
+$string['connection:error'] = 'Connection error: {$a}';
+$string['connection:success'] = 'Connection to payment gateway successful!';
 $string['connectionsettings'] = 'Connection settings';
 $string['cost'] = 'Course enrolment cost';
 $string['currency'] = 'Currency';
@@ -33,14 +36,24 @@ $string['defaultcurrency'] = 'Default currency';
 $string['defaultmsisdn'] = 'Default MSISDN';
 $string['defaultnetwork'] = 'Default network';
 $string['defaultpaymentmethod'] = 'Default payment method';
+$string['defaulttext'] = 'Default payment text';
+$string['defaulttextdefault'] = 'The enrolment fee for this course is <strong>[fee]</strong>. Please pay to proceed.';
+$string['itcsrvc:config'] = 'Configure itcsrvc enrol instances';
+$string['itcsrvc:enrolself'] = 'self enrol in course using itcsrvc';
+$string['itcsrvc:manage'] = 'Manage enrolled users';
+$string['itcsrvc:unenrol'] = 'Unenrol users from course';
 $string['msisdn'] = 'MSISDN';
+$string['narration'] = 'Payment for Moodle course {$a}';
 $string['network'] = 'Network';
+$string['nopermission'] = 'You do not have permission to enrol using this method.';
 $string['paymentmethod'] = 'Payment method';
 $string['paymentsettings'] = 'Payment settings';
-$string['paymenttext'] = 'Enrolment fee for Moodle course {$a->course} at {$a->site}';
+$string['paynow'] = 'Pay now';
 $string['pluginname'] = 'ITC payment gateway enrolment';
 $string['pluginname_desc'] = 'Users can pay to access courses via the ITC payment gateway.';
 $string['privacy:metadata'] = 'The ITC payment gateway enrolment plugin does not store any personal data.';
 $string['productid'] = 'Merchant product ID';
 $string['testconnection'] = 'Test connection';
+$string['text'] = 'Payment description';
+$string['text_help'] = 'The text that users will see on the payment page. You can use the placeholder [fee] to display the course fee.';
 $string['transflowid'] = 'Transflow ID';
