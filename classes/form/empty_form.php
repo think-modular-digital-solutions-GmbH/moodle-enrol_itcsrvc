@@ -27,15 +27,13 @@ namespace enrol_itcsrvc\form;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir . '/formslib.php');
-
 /**
  * Empty enrol_self form.
  * Useful to mimic valid enrol instances UI when the enrolment instance is not available.
  *
  * @package enrol_self
  */
-class empty_form extends moodleform {
+class empty_form extends \moodleform {
     /**
      * Form definition.
      * @return void
