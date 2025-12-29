@@ -15,16 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Contains class for helper functions for the ITC payment gateway enrolment plugin.
- *
- * @package    enrol_itcsrvc
- * @copyright  2025 think modular
- * @author     Stefan Weber <stefan.weber@think-modular.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
-/**
- * Helper functions for ITC payment gateway enrolment plugin.
+ * Contains class for the ITC payment gateway enrolment plugin.
  *
  * @package    enrol_itcsrvc
  * @copyright  2025 think modular
@@ -38,10 +29,34 @@ use Exception;
 use stdClass;
 use moodle_url;
 
+/**
+ * ITC payment gateway enrolment plugin functions.
+ *
+ * @package    enrol_itcsrvc
+ * @copyright  2025 think modular
+ * @author     Stefan Weber <stefan.weber@think-modular.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class itcsrvc {
-    /* constants for status */
+    /**
+     * Payment pending.
+     *
+     * @var int
+     */
     const STATUS_PENDING = 0;
+
+    /**
+     * Payment completed.
+     *
+     * @var int
+     */
     const STATUS_COMPLETED = 1;
+
+    /**
+     * Payment failed.
+     *
+     * @var int
+     */
     const STATUS_FAILED = 2;
 
     /**
@@ -55,8 +70,6 @@ class itcsrvc {
         // URLs.
         $courseurl = new \moodle_url('/course/view.php', ['id' => $instance->courseid]);
         $courseurl = $courseurl->out(false);
-        $successurl = new \moodle_url('/enrol/itcsrvc/success.php', ['instanceid' => $instance->id]);
-        $successurl = $successurl->out(false);
         $failureurl = new \moodle_url('/enrol/itcsrvc/failure.php', ['instanceid' => $instance->id]);
         $failureurl = $failureurl->out(false);
         $callbackurl = new \moodle_url('/enrol/itcsrvc/callback.php', ['instanceid' => $instance->id]);
@@ -72,10 +85,10 @@ class itcsrvc {
                 'enrol_itcsrvc',
                 $courseurl
             ),
-            "msisdn" => '',
+            "msisdn" => '', // Required for some reason.
             "amount" => $instance->cost,
             "currency" => $instance->currency,
-            "successRedirectUrl" => $successurl,
+            "successRedirectUrl" => $courseurl,
             "failureRedirectUrl" => $failureurl,
             "callbackUrl" => $callbackurl,
             "pageDescription" => "Checkout Page",
@@ -98,17 +111,79 @@ class itcsrvc {
         // Log response.
         $record = new stdClass();
         $record->enrolid = $instance->id;
-        $record->courseid = $instance->courseid;
         $record->userid = $USER->id;
         $record->productid = get_config('enrol_itcsrvc', 'productid');
         $record->transflowid = get_config('enrol_itcsrvc', 'transflowid');
         $record->transaction_reference = $responsedata['data']['transactionReference'];
         $record->payment_start = time();
-        $record->status = STATUS_PENDING;
+        $record->status = self::STATUS_PENDING;
         $DB->insert_record('enrol_itcsrvc_logs', $record);
 
         // Open checkout URL in browser.
         redirect(new moodle_url($checkouturl));
+    }
+
+    /**
+     * Check payment status for the given enrolment instance and user.
+     * @param object $instance
+     * @param int $userid
+     */
+    public static function check_payment_status($instance, $userid) {
+
+        global $DB;
+
+        // Check if there is a pending payment for this user and enrolment instance.
+        $payments = $DB->get_records('enrol_itcsrvc_logs', [
+            'enrolid' => $instance->id,
+            'userid' => $userid,
+        ]);
+        if (!$payments) {
+            return;
+        }
+
+        // Prepare request.
+        $endpoint = '/check-transaction-status';
+
+        // Check payments.
+        foreach ($payments as $payment) {
+            $data = [
+                'transactionReference' => $payment->transaction_reference,
+            ];
+
+            // Send request.
+            $response = self::request($endpoint, $data);
+
+            // Evaluate response.
+            if (isset($response['data']['data']['responseCode']) && $response['data']['data']['responseCode'] === '01') {
+                // Update record.
+                $payment->payment_complete = time();
+                $payment->status = self::STATUS_COMPLETED;
+                $DB->update_record('enrol_itcsrvc_logs', $payment);
+
+                // Enrol user in course.
+                $enrol = enrol_get_plugin($instance->enrol);
+                if (!$enrol) {
+                    throw new moodle_exception('invalidenrolplugin');
+                }
+                $enrol->enrol_user(
+                    $instance,
+                    $userid,
+                    $instance->roleid,
+                    time(),
+                    0
+                );
+
+                // Show notification about successful payment.
+                \core\notification::add(
+                    get_string('payment:success', 'enrol_itcsrvc'),
+                    \core\notification::NOTIFY_SUCCESS
+                );
+
+                // Redirect to course.
+                $courseurl = new \moodle_url('/course/view.php', ['id' => $instance->courseid]);
+                redirect($courseurl);
+            }
+        }
     }
 
     /**
@@ -158,10 +233,10 @@ class itcsrvc {
      */
     public static function get_currency_codes() {
         $currencies = \ResourceBundle::getLocales('');
-        $currencyCodes = \ResourceBundle::create('en', 'ICUDATA-curr')->get('Currencies');
+        $currencycodes = \ResourceBundle::create('en', 'ICUDATA-curr')->get('Currencies');
 
         $codes = [];
-        foreach ($currencyCodes as $code => $data) {
+        foreach ($currencycodes as $code => $data) {
             if (strlen($code) === 3) {
                 $codes[$code] = $code;
             }

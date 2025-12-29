@@ -36,11 +36,6 @@ use enrol_itcsrvc\form\empty_form;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class enrol_itcsrvc_plugin extends enrol_plugin {
-
-    // Globals.
-    const TYPE_OUTGOING = 0;
-    const TYPE_INCOMING = 1;
-
     /**
      * Is it possible to hide/show enrol instance via standard UI?
      *
@@ -97,6 +92,17 @@ class enrol_itcsrvc_plugin extends enrol_plugin {
     public function edit_instance_form($instance, MoodleQuickForm $mform, $context): void {
         $config = get_config('enrol_itcsrvc');
 
+        // Role.
+        $roles = get_assignable_roles($context, ROLENAME_BOTH);
+        $mform->addElement(
+            'select',
+            'roleid',
+            get_string('role'),
+            $roles
+        );
+        $mform->setType('roleid', PARAM_INT);
+        $mform->setDefault('roleid', '5');
+
         // Text.
         $defaulttext = $config->defaulttext ?? get_string('defaulttextdefault', 'enrol_itcsrvc');
         $mform->addElement(
@@ -129,34 +135,6 @@ class enrol_itcsrvc_plugin extends enrol_plugin {
             $options
         );
         $mform->setDefault('currency', $config->defaultcurrency ?? 'USD');
-
-        // Payment method.
-        $options = ['card' => 'card'];
-        $mform->addElement(
-            'select',
-            'customchar1',
-            get_string('paymentmethod', 'enrol_itcsrvc'),
-            $options
-        );
-        $mform->setDefault('customchar1', $config->defaultpaymentmethod ?? 'card');
-
-        // Network.
-        $mform->addElement(
-            'text',
-            'customchar2',
-            get_string('network', 'enrol_itcsrvc')
-        );
-        $mform->setType('customchar2', PARAM_TEXT);
-        $mform->setDefault('customchar2', $config->defaultnetwork ?? '');
-
-        // MSISDN.
-        $mform->addElement(
-            'text',
-            'customchar3',
-            get_string('msisdn', 'enrol_itcsrvc')
-        );
-        $mform->setType('customchar3', PARAM_TEXT);
-        $mform->setDefault('customchar3', $config->defaultmsisdn ?? '');
     }
 
     /**
@@ -203,7 +181,7 @@ class enrol_itcsrvc_plugin extends enrol_plugin {
                 return get_string('noguestaccess', 'enrol') . $OUTPUT->continue_button(get_login_url());
             }
             // Check if user is already enroled.
-            if ($DB->get_record('user_enrolments', array('userid' => $USER->id, 'enrolid' => $instance->id))) {
+            if ($DB->get_record('user_enrolments', ['userid' => $USER->id, 'enrolid' => $instance->id])) {
                 return get_string('alreadyenrolled', 'enrol_itcsrvc');
             }
         }
@@ -229,6 +207,9 @@ class enrol_itcsrvc_plugin extends enrol_plugin {
      */
     public function enrol_page_hook(stdClass $instance) {
         global $CFG, $OUTPUT, $USER;
+
+        // Check if the user already payed for the course.
+        itcsrvc::check_payment_status($instance, $USER->id);
 
         $enrolstatus = $this->can_self_enrol($instance);
 

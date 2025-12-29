@@ -32,7 +32,6 @@ namespace enrol_itcsrvc\form;
  * @package enrol_self
  */
 class empty_form extends moodleform {
-
     /**
      * Form definition.
      * @return void

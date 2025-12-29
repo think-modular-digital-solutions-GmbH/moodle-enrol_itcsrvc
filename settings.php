@@ -27,6 +27,8 @@ defined('MOODLE_INTERNAL') || die();
 
 use enrol_itcsrvc\itcsrvc;
 
+global $OUTPUT;
+
 if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_heading('enrol_itcsrvc_settings', '', get_string('pluginname_desc', 'enrol_itcsrvc')));
 
@@ -118,33 +120,4 @@ if ($ADMIN->fulltree) {
         'USD',
         $options,
     ));
-
-    // Default payment method.
-    $options = ['card'];
-    $settings->add(new admin_setting_configselect(
-        'enrol_itcsrvc/defaultpaymentmethod',
-        get_string('defaultpaymentmethod', 'enrol_itcsrvc'),
-        '',
-        'card',
-        $options,
-    ));
-
-    // Default network.
-    $settings->add(new admin_setting_configtext(
-        'enrol_itcsrvc/defaultnetwork',
-        get_string('defaultnetwork', 'enrol_itcsrvc'),
-        '',
-        'VODAFONE',
-        PARAM_TEXT,
-    ));
-
-    // Default MSISDN.
-    $settings->add(new admin_setting_configtext(
-        'enrol_itcsrvc/defaultmsisdn',
-        get_string('defaultmsisdn', 'enrol_itcsrvc'),
-        '',
-        '',
-        PARAM_TEXT,
-    ));
-
 }

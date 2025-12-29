@@ -27,7 +27,9 @@ namespace enrol_itcsrvc\form;
 
 use enrol_itcsrvc\itcsrvc;
 
-require_once($CFG->libdir.'/formslib.php');
+defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->libdir . '/formslib.php');
 
 /**
  * Enrolment form.
@@ -35,7 +37,6 @@ require_once($CFG->libdir.'/formslib.php');
  * @package enrol_itcsrvc
  */
 class enrol_form extends \moodleform {
-
     /**
      * Form definition.
      * @return void

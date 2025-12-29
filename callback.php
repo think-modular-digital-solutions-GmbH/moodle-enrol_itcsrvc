@@ -23,26 +23,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('../../config.php');
-require_once('lib.php');
+// We do not need to process the callback,
+// since we will be checking the transaction reference later instead.
 
-defined('MOODLE_INTERNAL') || die();
-
-global $DB;
-
-// Read contents.
-$raw = file_get_contents('php://input');
-$data = json_decode($raw, true);
-
-// Log data.
-$record = new stdClass();
-$record->timestamp = time();
-$record->type = enrol_itcsrvc_plugin::TYPE_INCOMING; // Replace with global later.
-$record->enrolid = 1;
-$record->courseid = 1;
-$record->userid = 1;
-$record->httpstatus = 200;
-$record->payload = json_encode($data);
-$DB->insert_record('enrol_itcsrvc_logs', $record);
-
-echo "OK";
+// The external system expects 200 OK in all cases.
+http_response_code(200);
+exit();

@@ -27,10 +27,9 @@ require_once('../../config.php');
 
 defined('MOODLE_INTERNAL') || die();
 
-use enrol_itcsrvc\itcsrvc;
+require_admin();
 
-// Admins only.
-require_capability('moodle/site:config', context_system::instance());
+use enrol_itcsrvc\itcsrvc;
 
 // Make fake request to check connection.
 $endpoint = '/check-transaction-status';

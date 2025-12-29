@@ -27,18 +27,13 @@ require_once('../../config.php');
 
 defined('MOODLE_INTERNAL') || die();
 
-echo "failure";
-die();
+require_login();
 
-global $DB;
+// Show notification about failed payment.
+\core\notification::add(
+    get_string('payment:failed', 'enrol_itcsrvc'),
+    \core\notification::ERROR
+);
 
-$record = new stdClass();
-$record->timestamp = time();
-$record->type = 1; // Replace with global later.
-$record->enrolid = 1;
-$record->courseid = 1;
-$record->userid = 1;
-$record->httpstatus = 200;
-$record->payload = 'FAILURE';
-$DB->insert_record('enrol_itcsrvc_logs', $record);
-
+// Redirect to homepage.
+redirect(new moodle_url('/'));
