@@ -176,7 +176,7 @@ class itcsrvc {
                 // Show notification about successful payment.
                 \core\notification::add(
                     get_string('payment:success', 'enrol_itcsrvc'),
-                    \core\notification::NOTIFY_SUCCESS
+                    \core\notification::SUCCESS
                 );
 
                 // Redirect to course.
