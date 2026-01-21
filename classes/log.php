@@ -37,12 +37,11 @@ class log {
     /**
      * Format course column.
      *
-     * @param int $enrolid
+     * @param int $courseid
      * @return string
      */
-    public static function course($enrolid) {
+    public static function course($courseid) {
         global $DB;
-        $courseid = $DB->get_field('enrol', 'courseid', ['id' => $enrolid], IGNORE_MISSING);
         $course = $DB->get_record('course', ['id' => $courseid], 'id, fullname', IGNORE_MISSING);
         if ($course) {
             if ($course->fullname) {
@@ -51,6 +50,30 @@ class log {
             }
         }
         return get_string('deletedcourse', 'enrol_itcsrvc');
+    }
+
+    /**
+     * Format enrolid column.
+     *
+     * @param int $courseid
+     * @param int $enrolid
+     * @return string
+     */
+    public static function enrol($courseid, $enrolid) {
+        global $OUTPUT;
+
+        $urlparams = [
+            'courseid' => $courseid,
+            'id' => $enrolid,
+            'type' => 'itcsrvc',
+        ];
+        $url = new \moodle_url('/enrol/editinstance.php', $urlparams);
+        $icon = new \pix_icon(
+            'i/edit',
+            get_string('edit'),
+            'core'
+        );
+        return $OUTPUT->action_icon($url, $icon);
     }
 
     /**

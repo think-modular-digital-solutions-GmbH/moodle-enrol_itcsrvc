@@ -92,6 +92,14 @@ class enrol_itcsrvc_plugin extends enrol_plugin {
     public function edit_instance_form($instance, MoodleQuickForm $mform, $context): void {
         $config = get_config('enrol_itcsrvc');
 
+        // Custom instance name.
+        $mform->addElement(
+            'text',
+            'name',
+            get_string('custominstancename', 'enrol')
+        );
+        $mform->setType('name', PARAM_TEXT);
+        $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'server');
         // Role.
         $roles = get_assignable_roles($context, ROLENAME_BOTH);
         $mform->addElement(
@@ -219,6 +227,8 @@ class enrol_itcsrvc_plugin extends enrol_plugin {
             $form = new enrol_form($url, $instance);
             if ($data = $form->get_data()) {
                 // Process payment.
+                $instanceid = $data->instanceid;
+                $instance = itcsrvc::get_instance($instanceid);
                 itcsrvc::pay($instance);
             }
         } else {
@@ -238,8 +248,11 @@ class enrol_itcsrvc_plugin extends enrol_plugin {
         ob_start();
         $form->display();
         $output = ob_get_clean();
+        $header = $this->get_instance_name($instance);
+        $html = $OUTPUT->heading($header, 4);
+        $text = $html . $output;
         return $OUTPUT->box(
-            html_writer::div($output, 'px-3'),
+            html_writer::div($text, 'px-3'),
             'generalbox'
         );
     }

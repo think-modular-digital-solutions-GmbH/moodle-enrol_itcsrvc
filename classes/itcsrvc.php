@@ -60,6 +60,28 @@ class itcsrvc {
     const STATUS_FAILED = 2;
 
     /**
+     * Returns the instance of the enrolment plugin.
+     *
+     * @param string $instanceid
+     * @return stdClass
+     */
+    public static function get_instance($instanceid) {
+        global $DB;
+
+        $instance = $DB->get_record(
+            'enrol',
+            [
+                'id' => $instanceid,
+                'enrol' => 'itcsrvc',
+            ],
+            '*',
+            MUST_EXIST
+        );
+
+        return $instance;
+    }
+
+    /**
      * Process a payment for the given enrolment instance.
      * @param object $instance
      */

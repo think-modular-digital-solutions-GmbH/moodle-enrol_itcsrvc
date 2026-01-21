@@ -43,17 +43,38 @@ class enrol_form extends \moodleform {
      */
     public function definition() {
 
+        // Instance ID.
+        $instance = $this->_customdata;
+        $this->_form->addElement(
+            'hidden',
+            'instanceid',
+            $instance->id
+        );
+        $this->_form->setType('instanceid', PARAM_INT);
+
+        $this->_form->addElement(
+            'static',
+            'test',
+            "isntance: " . $instance->id,
+            ""
+        );
+
         // Payment text.
         $currencies = itcsrvc::get_currency_codes();
-        $fee = $this->_customdata->cost . ' ' . $this->_customdata->currency;
-        $text = str_replace('[fee]', $fee, $this->_customdata->customtext1);
+        $fee = $instance->cost . ' ' . $instance->currency;
+        $text = str_replace('[fee]', $fee, $instance->customtext1);
         $this->_form->addElement(
             'html',
             $text,
         );
 
         // Spacer.
-        $this->_form->addElement('static', 'spacer', '', '<br>');
+        $this->_form->addElement(
+            'static',
+            'spacer',
+            '',
+            \html_writer::empty_tag('br'),
+        );
 
         // Submit button.
         $this->_form->addElement(
