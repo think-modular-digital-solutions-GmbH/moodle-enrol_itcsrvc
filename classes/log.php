@@ -105,6 +105,9 @@ class log {
      * @return string formatted timestamp
      */
     public static function timestamp($value) {
+        if (empty($value)) {
+            return '';
+        }
         $date = date('Y-m-d', $value);
         $time = date('H:i:s', $value);
         return "$date<br>$time";

@@ -45,7 +45,6 @@ $table->is_downloading($download, 'payment_log', 'payment_log');
 
 // Columns and headers.
 $table->define_columns([
-    'id',
     'courseid',
     'userid',
     'transaction_reference',
@@ -54,7 +53,6 @@ $table->define_columns([
     'status',
 ]);
 $table->define_headers([
-    'id',
     get_string('course'),
     get_string('user'),
     get_string('transaction_reference', 'enrol_itcsrvc'),
@@ -79,10 +77,9 @@ if (!$table->is_downloading()) {
 }
 
 // Add data.
-$logs = $DB->get_records('enrol_itcsrvc_logs');
+$logs = $DB->get_records('enrol_itcsrvc_logs', null, 'payment_start DESC');
 foreach ($logs as $log) {
     $table->add_data([
-        $log->id,
         log::course($log->enrolid),
         log::user($log->userid),
         $log->transaction_reference,
