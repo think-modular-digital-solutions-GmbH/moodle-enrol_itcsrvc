@@ -120,4 +120,17 @@ if ($ADMIN->fulltree) {
         'USD',
         $options,
     ));
+
+    // Link to payment logs.
+    $url = new moodle_url('/enrol/itcsrvc/payment_log.php');
+    $button = html_writer::link(
+        $url,
+        get_string('logs:view', 'enrol_itcsrvc'),
+        ['class' => 'btn btn-secondary m-1']
+    );
+    $settings->add(new admin_setting_heading(
+        'enrol_itcsrvc/paymentlogs',
+        get_string('logs', 'enrol_itcsrvc'),
+        $button,
+    ));
 }

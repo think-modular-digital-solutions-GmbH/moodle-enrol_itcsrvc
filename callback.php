@@ -23,6 +23,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// phpcs:disable moodle
+
 // We do not need to process the callback,
 // since we will be checking the transaction reference later instead.
 

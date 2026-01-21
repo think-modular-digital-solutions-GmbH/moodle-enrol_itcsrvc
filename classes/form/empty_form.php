@@ -25,8 +25,6 @@
 
 namespace enrol_itcsrvc\form;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Empty enrol_self form.
  * Useful to mimic valid enrol instances UI when the enrolment instance is not available.
